@@ -155,6 +155,6 @@ This Inventory Management System efficiently handles:
 
 The use of triggers, stored procedures, and auto-generated IDs ensures data integrity and workflow automation, making it a robust solution for businesses.
 
+Check Out my medium article on this Project : https://medium.com/@asim_writes/building-an-inventory-management-system-with-sql-baea6bdee1dd
 
- 
      
