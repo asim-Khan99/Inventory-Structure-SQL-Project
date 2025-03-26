@@ -1,3 +1,6 @@
+--Create Database
+create database Inventory;
+Use Inventory;
 -- Create SUPPLIER Table
 CREATE TABLE SUPPLIER (
     SID CHAR(5) PRIMARY KEY,          -- Supplier ID (Primary Key - Uniquely identifies each supplier)
