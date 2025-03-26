@@ -1,0 +1,815 @@
+-- Create SUPPLIER Table
+CREATE TABLE SUPPLIER (
+    SID CHAR(5) PRIMARY KEY,          -- Supplier ID (Primary Key - Uniquely identifies each supplier)
+    SNAME VARCHAR(50) NOT NULL,       -- Supplier Name (Not Null - Ensures every supplier has a name)
+    SADD VARCHAR(100) NOT NULL,       -- Supplier Address (Not Null - Ensures every supplier has an address)
+    SCITY VARCHAR(20) DEFAULT 'DELHI', -- Supplier City (Default: DELHI - Sets 'DELHI' as the default city if not provided)
+    SPHONE VARCHAR(15) UNIQUE,        -- Supplier Phone (Unique - Ensures no two suppliers have the same phone number)
+    EMAIL VARCHAR(50)                  -- Supplier Email (Allows storing email addresses)
+);
+/*
+Explanation:
+This SQL code creates the `SUPPLIER` table, which stores information about the suppliers. 
+-   `SID` is the primary key, ensuring each supplier is uniquely identified. 
+-   `NOT NULL` constraints enforce data integrity by requiring values for essential columns like `SNAME` and `SADD`.
+-   A `DEFAULT` constraint is used for `SCITY`, providing a default value.
+-   A `UNIQUE` constraint on `SPHONE` prevents duplicate phone numbers.
+*/
+
+-- Create PRODUCT Table
+CREATE TABLE PRODUCT (
+    PID CHAR(5) PRIMARY KEY,          -- Product ID (Primary Key - Uniquely identifies each product)
+    PDESC VARCHAR(50) NOT NULL,       -- Product Description (Not Null - Ensures every product has a description)
+    PRICE DECIMAL(10, 2) CHECK (PRICE > 0), -- Price (Must be greater than 0 - Ensures price is a positive value)
+    CATEGORY VARCHAR(10) CHECK (CATEGORY IN ('IT', 'HA', 'HC')), -- Category (IT, HA, HC) - Restricts category to specified values (IT: Information Technology, HA: Home Appliances, HC: Health Care)
+    SID CHAR(5) FOREIGN KEY REFERENCES SUPPLIER(SID) -- Supplier ID (Foreign Key - Establishes a relationship with the SUPPLIER table)
+);
+/*
+Explanation:
+This SQL code creates the `PRODUCT` table.
+-   `PID` is the primary key.
+-   A `CHECK` constraint ensures that the `PRICE` is always positive and that `CATEGORY` only holds specific values.
+-   `SID` is a foreign key that links each product to a supplier in the `SUPPLIER` table, enforcing referential integrity.
+*/
+
+-- Create STOCK Table
+CREATE TABLE STOCK (
+    PID CHAR(5) FOREIGN KEY REFERENCES PRODUCT(PID), -- Product ID (Foreign Key - Links to the PRODUCT table)
+    SQTY INT CHECK (SQTY >= 0),       -- Stock Quantity (Must be >= 0 - Ensures stock quantity is not negative)
+    ROL INT CHECK (ROL > 0),          -- Reorder Level (Must be > 0 - Ensures reorder level is positive)
+    MOQ INT CHECK (MOQ >= 5)           -- Minimum Order Quantity (Must be >= 5)
+);
+/*
+Explanation:
+The `STOCK` table maintains inventory levels.
+-   `PID` is a foreign key referencing the `PRODUCT` table.
+-   `CHECK` constraints validate that `SQTY`, `ROL` (Reorder Level), and `MOQ` (Minimum Order Quantity) have appropriate values.
+*/
+
+-- Create CUST Table
+CREATE TABLE CUST (
+    CID CHAR(5) PRIMARY KEY,          -- Customer ID (Primary Key - Uniquely identifies each customer)
+    CNAME VARCHAR(50) NOT NULL,       -- Customer Name (Not Null - Ensures every customer has a name)
+    ADDRESS VARCHAR(100) NOT NULL,    -- Customer Address (Not Null - Ensures every customer has an address)
+    CITY VARCHAR(20) NOT NULL,        -- Customer City (Not Null - Ensures every customer has a city)
+    PHONE VARCHAR(15) NOT NULL,       -- Customer Phone (Not Null - Ensures every customer has a phone number)
+    EMAIL VARCHAR(50) NOT NULL,       -- Customer Email (Not Null - Ensures every customer has an email)
+    DOB DATE CHECK (DOB < '2000-01-01') -- Date of Birth (Must be before 1-Jan-2000 -  Ensures date of birth is before 1/1/2000)
+);
+/*
+Explanation:
+The `CUST` table stores customer details.
+-   `CID` is the primary key.
+-   `NOT NULL` constraints are used to enforce data integrity.
+-   A `CHECK` constraint on `DOB` might be used for data validation (e.g., ensuring customers are of a certain age, although the provided constraint checks for DOB before '2000-01-01').
+*/
+
+-- Create ORDERS Table
+CREATE TABLE ORDERS (
+    OID CHAR(5) PRIMARY KEY,          -- Order ID (Primary Key - Uniquely identifies each order)
+    ODATE DATE,                       -- Order Date
+    CID CHAR(5) FOREIGN KEY REFERENCES CUST(CID), -- Customer ID (Foreign Key - Links to the CUST table)
+    PID CHAR(5) FOREIGN KEY REFERENCES PRODUCT(PID), -- Product ID (Foreign Key - Links to the PRODUCT table)
+    OQTY INT CHECK (OQTY >= 1)         -- Order Quantity (Must be >= 1 - Ensures order quantity is at least 1)
+);
+/*
+Explanation:
+The `ORDERS` table records customer orders.
+-   `OID` is the primary key.
+-   `CID` and `PID` are foreign keys, establishing relationships with the `CUST` and `PRODUCT` tables respectively.
+-   A `CHECK` constraint ensures that the order quantity is at least 1.
+*/
+
+-- 2. Data Insertion Statements
+
+-- Insert records into SUPPLIER table
+INSERT INTO SUPPLIER (SID, SNAME, SADD, SCITY, SPHONE, EMAIL)
+VALUES
+('S0001', 'Tech Suppliers', '123 Tech St', 'DELHI', '9876543210', 'tech@suppliers.com'),
+('S0002', 'Home Appliances Inc', '456 Home Ave', 'MUMBAI', '9876543211', 'home@appliances.com'),
+('S0003', 'Health Care Ltd', '789 Health Rd', 'DELHI', '9876543212', 'health@care.com'),
+('S0004', 'Gadget World', '321 Gadget Ln', 'BANGALORE', '9876543213', 'gadget@world.com'),
+('S0005', 'Electro Mart', '654 Electro Blvd', 'CHENNAI', '9876543214', 'electro@mart.com');
+/*
+Explanation:
+These INSERT statements populate the `SUPPLIER` table with initial data. Each row represents a different supplier with their respective details.
+*/
+
+-- Insert records into PRODUCT table
+INSERT INTO PRODUCT (PID, PDESC, PRICE, CATEGORY, SID)
+VALUES
+('P0001', 'Laptop', 50000.00, 'IT', 'S0001'),
+('P0002', 'Refrigerator', 30000.00, 'HA', 'S0002'),
+('P0003', 'Air Conditioner', 40000.00, 'HA', 'S0002'),
+('P0004', 'Blood Pressure Monitor', 2000.00, 'HC', 'S0003'),
+('P0005', 'Smartphone', 25000.00, 'IT', 'S0001'),
+('P0006', 'Washing Machine', 35000.00, 'HA', 'S0002'),
+('P0007', 'Tablet', 15000.00, 'IT', 'S0001'),
+('P0008', 'Oximeter', 1500.00, 'HC', 'S0003'),
+('P0009', 'Microwave Oven', 12000.00, 'HA', 'S0002'),
+('P0010', 'Printer', 8000.00, 'IT', 'S0001'),
+('P0011', 'Television', 45000.00, 'HA', 'S0002'),
+('P0012', 'Fitness Band', 3000.00, 'HC', 'S0003'),
+('P0013', 'Desktop Computer', 60000.00, 'IT', 'S0001'),
+('P0014', 'Vacuum Cleaner', 10000.00, 'HA', 'S0002'),
+('P0015', 'Thermometer', 500.00, 'HC', 'S0003');
+/*
+Explanation:
+These INSERT statements populate the `PRODUCT` table with sample product data, including descriptions, prices, categories, and supplier IDs.
+*/
+
+-- Insert records into STOCK table
+INSERT INTO STOCK (PID, SQTY, ROL, MOQ)
+VALUES
+('P0001', 50, 10, 5),
+('P0002', 30, 5, 5),
+('P0003', 20, 5, 5),
+('P0004', 100, 20, 10),
+('P0005', 60, 15, 5),
+('P0006', 25, 5, 5),
+('P0007', 40, 10, 5),
+('P0008', 150, 30, 10),
+('P0009', 35, 5, 5),
+('P0010', 20, 5, 5);
+/*
+Explanation:
+These INSERT statements add initial stock information to the `STOCK` table, specifying the quantity, reorder level, and minimum order quantity for each product.
+*/
+
+-- Insert records into CUST table
+INSERT INTO CUST (CID, CNAME, ADDRESS, CITY, PHONE, EMAIL, DOB)
+VALUES
+('C0001', 'Amit Sharma', '123 Main St', 'DELHI', '9876543215', 'amit@sharma.com', '1990-05-15'),
+('C0002', 'Priya Singh', '456 Elm St', 'MUMBAI', '9876543216', 'priya@singh.com', '1992-08-20'),
+('C0003', 'Rahul Gupta', '789 Oak St', 'BANGALORE', '9876543217', 'rahul@gupta.com', '1985-12-10'),
+('C0004', 'Neha Patel', '321 Pine St', 'CHENNAI', '9876543218', 'neha@patel.com', '1995-03-25'),
+('C0005', 'Suresh Kumar', '654 Maple St', 'DELHI', '9876543219', 'suresh@kumar.com', '1988-07-30');
+/*
+Explanation:
+These INSERT statements populate the `CUST` table with customer data.
+*/
+
+-- Insert records into ORDERS table
+INSERT INTO ORDERS (OID, ODATE, CID, PID, OQTY)
+VALUES
+('O0001', '2023-10-01', 'C0001', 'P0001', 2),
+('O0002', '2023-10-02', 'C0002', 'P0002', 1),
+('O0003', '2023-10-03', 'C0003', 'P0003', 1),
+('O0004', '2023-10-04', 'C0004', 'P0004', 5),
+('O0005', '2023-10-05', 'C0005', 'P0005', 3);
+/*
+Explanation:
+These INSERT statements add data to the `ORDERS` table, recording customer orders with order dates, customer IDs, product IDs, and quantities.
+*/
+
+-- 3. Data Retrieval Queries
+
+-- Query1: DISPLAY PID, PDESC, CATEGORY, SNAME, SCITY
+SELECT 
+    P.PID,  -- Product ID
+    P.PDESC, -- Product Description
+    P.CATEGORY, -- Product Category
+    S.SNAME,  -- Supplier Name
+    S.SCITY   -- Supplier City
+FROM 
+    PRODUCT P  -- Alias P for PRODUCT table
+INNER JOIN   -- Join PRODUCT and SUPPLIER tables
+    SUPPLIER S ON P.SID = S.SID; -- Join condition: Supplier ID in PRODUCT matches Supplier ID in SUPPLIER
+/*
+Explanation:
+This SQL query retrieves product information along with the supplier's name and city.
+-   It uses an `INNER JOIN` to combine rows from the `PRODUCT` and `SUPPLIER` tables based on the `SID` (Supplier ID).
+-   Aliases (`P` and `S`) are used to make the query more readable.
+*/
+
+-- Query2: DISPLAY OID, ODATE, CNAME, CADDRESS, CPHONE, PDESC, PRICE, OQTY, AMT
+SELECT 
+    O.OID,   -- Order ID
+    O.ODATE, -- Order Date
+    C.CNAME,  -- Customer Name
+    C.ADDRESS AS CADDRESS,  -- Customer Address (aliased as CADDRESS)
+    C.PHONE AS CPHONE,    -- Customer Phone (aliased as CPHONE)
+    P.PDESC,  -- Product Description
+    P.PRICE,  -- Product Price
+    O.OQTY,   -- Order Quantity
+    (P.PRICE * O.OQTY) AS AMT  -- Calculated Amount (Price * Quantity), aliased as AMT
+FROM 
+    ORDERS O  -- Alias O for ORDERS table
+JOIN   -- Join ORDERS, CUST, and PRODUCT tables
+    CUST C ON O.CID = C.CID  -- Join condition: Customer ID in ORDERS matches Customer ID in CUST
+JOIN 
+    PRODUCT P ON O.PID = P.PID; -- Join condition: Product ID in ORDERS matches Product ID in PRODUCT
+/*
+Explanation:
+This query retrieves order details, including customer information, product details, and the calculated amount for each order.
+-   It uses `JOIN` clauses to combine data from the `ORDERS`, `CUST`, and `PRODUCT` tables.
+-   Aliases are used for brevity and clarity.
+-   The `AMT` column is a calculated field.
+*/
+
+-- Query3: Create a View BILL
+Create View BILL as  -- Create a view named BILL
+  SELECT 
+    O.OID,   -- Order ID
+    O.ODATE, -- Order Date
+    C.CNAME,  -- Customer Name
+    C.ADDRESS AS CADDRESS,  -- Customer Address (aliased)
+    C.PHONE AS CPHONE,    -- Customer Phone (aliased)
+    P.PDESC,  -- Product Description
+    P.PRICE,  -- Product Price
+    O.OQTY,   -- Order Quantity
+    (P.PRICE * O.OQTY) AS AMT   -- Calculated Amount (aliased)
+  from ORDERS O  -- Alias O for ORDERS
+  inner join CUST C  -- Join ORDERS and CUST
+  On C.CID = O.CID  -- Join condition: Customer ID matches
+  inner join PRODUCT P   -- Join with PRODUCT
+  On P.PID = O.PID;  -- Join condition: Product ID matches
+  
+SELECT * from BILL;  -- Select all from the BILL view
+/*
+Explanation:
+This code creates a view named `BILL` that encapsulates the logic for generating a bill.
+-   A view is a virtual table based on the result-set of an SQL statement.
+-   It simplifies complex queries and provides a consistent way to access bill information.
+-   The `SELECT` statement within the `CREATE VIEW` is similar to Query 2, retrieving order, customer, and product details.
+-   `SELECT * from BILL;` queries the view
+*/
+
+-- 4. Stored Procedures
+
+-- Query4: CREATE BELOW PROCEDURES IN THE INVENTORY DATABASE AS SPECIFIED :
+-- (a) ADDSUPPLIER – SHOULD ADD THE SUPPLIER IN THE SUPPLIER TABLE AND DISPLAY THE DETAILS OF THE NEW SUPPLIER ADDED.
+-- (b) ADDPRO – SHOULD ADD THE PRODUCT IN THE PRODUCT TABLE AND DISPLAY THE DETAILS OF THE NEW PRODUCT ADDED.
+-- (c) ADDCUST – SHOULD ADD THE CUSTOMER IN THE CUSTOMER TABLE AND DISPLAY THE DETAILS OF THE NEW CUSTOMER ADDED.
+-- (d) ADDORDER – SHOULD ADD THE ORDER IN THE ORDERS TABLE AND DISPLAY THE DETAILS OF THE ORDER.
+--     ORDER DATE SHOULD BE CURRENT DATE AND SHOULD COME AUTOMATICALLY.
+
+-- Procedure to add a supplier
+create procedure ADDSUPPLIER 
+    @ID as CHAR(5),           -- Supplier ID
+    @N as  VARCHAR(50),       -- Supplier Name
+    @AD as VARCHAR(100),      -- Supplier Address
+    @C as VARCHAR(20),        -- Supplier City
+    @PH as VARCHAR(15),       -- Supplier Phone
+    @EM as VARCHAR(50)         -- Supplier Email
+AS
+BEGIN
+    insert into SUPPLIER  -- Insert a new row into the SUPPLIER table
+    values(@ID, @N, @AD, @C, @PH, @EM); -- Insert the provided values
+    SELECT * from SUPPLIER where sid = @ID; -- Select and display the details of the newly added supplier
+end;
+
+-- Execute the ADDSUPPLIER procedure
+ADDSUPPLIER 'S0001', 'Tech Suppliers', '123 Tech St', 'DELHI', '9876543210', 'tech@suppliers.com';
+
+SELECT * from SUPPLIER;   -- Display all suppliers
+
+-- Procedure to add a product
+create procedure ADDPRO 
+    @PID as  CHAR(5),          -- Product ID
+    @DS as VARCHAR(50),       -- Product Description
+    @PR as DECIMAL(10, 2),    -- Product Price
+    @CT as VARCHAR(10),       -- Product Category
+    @SID as CHAR(5)            -- Supplier ID
+as 
+BEGIN
+    insert into PRODUCT  -- Insert a new row into the PRODUCT table
+    VALUES (@PID, @DS, @PR, @CT, @SID); -- Insert the provided values
+    SELECT * from PRODUCT where pid = @PID; -- Select and display the details of the newly added product
+end;    
+
+-- Execute the ADDPRO procedure
+ADDPRO 'P0001', 'Laptop', 50000.00, 'IT', 'S0001';
+
+-- Procedure to add a customer
+create procedure ADDCUST 
+    @CID as  CHAR(5),          -- Customer ID
+    @NM as VARCHAR(50),       -- Customer Name
+    @AD as varchar(50),       -- Customer Address
+    @CT as VARCHAR(10),       -- Customer City
+    @PH as varchar(15),       -- Customer Phone
+    @EM as varchar(30),       -- Customer Email
+    @DB as date               -- Customer Date of Birth
+as 
+BEGIN
+    insert into CUST  -- Insert a new row into the CUST table
+    VALUES (@CID, @NM, @AD, @CT, @PH, @EM, @DB); -- Insert the provided values
+    SELECT * from CUST where cid = @CID; -- Select and display the details of the newly added customer
+end;
+
+-- Execute the ADDCUST procedure
+ADDCUST 'C0001', 'Amit Sharma', '123 Main St', 'DELHI', '9876543215', 'amit@sharma.com', '1990-05-15';
+
+-- Procedure to add an order
+create procedure ADDORDER 
+    @OID as  CHAR(5),          -- Order ID
+    @PID as char(5),         -- Product ID
+    @CID as CHAR(5),          -- Customer ID
+    @OQT as int                -- Order Quantity
+as 
+BEGIN
+    declare @OD as date;   -- Declare a variable to hold the order date
+    set @OD = getdate();  -- Set the order date to the current date
+    insert into ORDERS   -- Insert a new row into the ORDERS table
+    VALUES (@OID, @OD, @CID, @PID, @OQT); -- Insert the provided values, including the automatically generated order date
+    SELECT * from ORDERS where oid = @OID; -- Select and display the details of the newly added order
+end;
+
+-- Execute the ADDORDER procedure
+ADDORDER 'O0001',  'P0001', 'C0001', 2;
+/*
+Explanation:
+This section defines stored procedures for adding data to the tables.
+-   Stored procedures are precompiled SQL code that can be executed repeatedly. They improve performance and code organization.
+-   `ADDSUPPLIER`, `ADDPRO`, `ADDCUST`, and `ADDORDER` procedures take the necessary parameters to insert data into their respective tables.
+-   The `ADDORDER` procedure demonstrates how to automatically generate the order date using `GETDATE()`.
+-   After inserting the data, each procedure selects and displays the newly added record for verification.
+*/
+
+-- Query5: CREATE A FUNCTION FOR AUTOGENERATION OF 5 CHARACTERS ALPHA NUMERIC ID.
+-- IT SHOULD ACCEPT 2 PARAMETERS A CHARACTER AND THE NUMBER AND RETURN THE ID BY CONCATENATING THE CHARACTER, REQUIRED ZEROS, AND THE SPECIFIED NUMBER.
+-- RECREATE BELOW PROCEDURES IN THE INVENTORY DATABASE AS SPECIFIED (ALL THE IDs SHOULD BE AUTOMATICALLY GENERATED USING ABOVE CREATED FUNCTION AND SEQUENCES) :
+-- ADDSUPPLIER – SHOULD ADD THE SUPPLIER IN THE SUPPLIER TABLE AND DISPLAY THE DETAILS OF THE NEW SUPPLIER ADDED.
+-- ADDPRO – SHOULD ADD THE PRODUCT IN THE PRODUCT TABLE AND DISPLAY THE DETAILS OF THE NEW PRODUCT ADDED.
+-- ADDCUST – SHOULD ADD THE CUSTOMER IN THE CUSTOMER TABLE AND DISPLAY THE DETAILS OF THE NEW CUSTOMER ADDED.
+-- ADDORDER – SHOULD ADD THE ORDER IN THE ORDERS TABLE AND DISPLAY THE DETAILS OF THE ORDER.
+-- ORDER DATE SHOULD BE CURRENT DATE AND SHOULD COME AUTOMATICALLY.
+
+-- Function to generate a 5-character alphanumeric ID
+create function fn1 (@c as char(1), @I as int)
+returns char(5)
+as 
+BEGIN
+    declare @ID as char(5);  -- Declare a variable to hold the generated ID
+    if @I < 10  -- If the number is less than 10
+        set @ID = concat(@c, '000', @I); -- Concatenate the character with leading zeros and the number
+    else if @I < 100  -- If the number is less than 100
+        set @ID = concat(@c, '00', @I);  -- Concatenate with two leading zeros
+    else if @I < 1000  -- If the number is less than 1000
+        set @ID = concat(@c, '0', @I);   -- Concatenate with one leading zero
+    else if @I < 10000  -- If the number is less than 10000
+        set @ID = concat(@c, @I);    -- Concatenate directly
+    else 
+        set @ID = 'NA';  -- If the number is too large, return 'NA'
+    return @ID  -- Return the generated ID
+end;    
+
+SELECT dbo.fn1('E', 1001);  -- Example of using the function
+
+-- Create a sequence for generating numeric parts of IDs
+create sequence SQ1
+as INT
+start with 1   -- Start the sequence from 1
+increment by 1;  -- Increment the sequence by 1 for each call
+
+-- Recreate SUPPLIER table (if needed, based on the original script)
+CREATE TABLE SUPPLIER (
+    SID CHAR(5) PRIMARY KEY,          -- Supplier ID (Primary Key)
+    SNAME VARCHAR(50) NOT NULL,       -- Supplier Name (Not Null)
+    SADD VARCHAR(100) NOT NULL,       -- Supplier Address (Not Null)
+    SCITY VARCHAR(20) DEFAULT 'DELHI', -- Supplier City (Default: DELHI)
+    SPHONE VARCHAR(15) UNIQUE,        -- Supplier Phone (Unique)
+    EMAIL VARCHAR(50)                 -- Supplier Email
+);
+
+-- Recreate ADDSUPPLIER procedure to use the ID generation function and sequence
+create procedure ADDSUPPLIER          
+    @N as  VARCHAR(50),      -- Supplier Name
+    @AD as VARCHAR(100),       -- Supplier Address
+    @C as VARCHAR(20),        -- Supplier City
+    @PH as VARCHAR(15),       -- Supplier Phone
+    @EM as VARCHAR(50)         -- Supplier Email
+AS
+BEGIN
+    declare @SID as CHAR(5);  -- Declare a variable for the Supplier ID
+    DECLARE @I as int;   -- Declare a variable to get value from sequence
+    set @I = (next value for SQ1);  -- Get the next value from the sequence
+    set @SID = dbo.fn1('S', @I);  -- Generate the Supplier ID using the function
+    insert into SUPPLIER  -- Insert into the SUPPLIER table
+    values (@SID, @N, @AD, @C, @PH, @EM); -- Insert the generated ID and other details
+    SELECT * from SUPPLIER where sid = @SID;  -- Select and display the newly added supplier
+end;
+
+-- Execute the ADDSUPPLIER procedure
+ADDSUPPLIER 'Tech Suppliers', '123 Tech St', 'DELHI', '9876543210', 'tech@suppliers.com';
+ADDSUPPLIER 'Home Appliances Inc', '456 Home Ave', 'MUMBAI', '9876543211', 'home@appliances.com';
+ADDSUPPLIER 'Health Care Ltd', '789 Health Rd', 'DELHI', '9876543212', 'health@care.com';
+
+--Demonstration of dropping table, procedure and sequence.
+drop table SUPPLIER;
+drop procedure ADDSUPPLIER;
+drop sequence sq1;
+SELECT * from SUPPLIER;
+
+-- Recreate PRODUCT table (if needed)
+CREATE TABLE PRODUCT (
+    PID CHAR(5) PRIMARY KEY,          -- Product ID (Primary Key)
+    PDESC VARCHAR(50) NOT NULL,       -- Product Description (Not Null)
+    PRICE DECIMAL(10, 2) CHECK (PRICE > 0), -- Price (Must be greater than 0)
+    CATEGORY VARCHAR(10) CHECK (CATEGORY IN ('IT', 'HA', 'HC')), -- Category (IT, HA, HC)
+    SID CHAR(5) FOREIGN KEY REFERENCES SUPPLIER(SID) -- Supplier ID (Foreign Key)
+);
+
+-- Create a sequence for generating Product IDs
+create sequence SQ2
+as INT
+start with 1
+increment by 1;
+
+-- Recreate ADDPRO procedure to use the ID generation function and sequence
+create procedure ADDPRO    
+    @DS as VARCHAR(50),       -- Product Description
+    @PR as DECIMAL(10, 2),    -- Product Price
+    @CT as VARCHAR(10),       -- Product Category
+    @SID as CHAR(5)            -- Supplier ID
+as 
+BEGIN
+    DECLARE @PID as  CHAR(5);  -- Declare a variable for Product ID
+    DECLARE @I as int;   -- Declare a variable to get value from sequence
+    set @I = (next value for SQ2);  -- Get the next value from sequence
+    set @PID = dbo.fn1('P', @I);  -- Generate Product ID
+    insert into PRODUCT
+    VALUES (@PID, @DS, @PR, @CT, @SID);
+    SELECT * from PRODUCT where pid = @PID;
+end;
+
+-- Execute the ADDPRO procedure
+ADDPRO 'Laptop', 50000.00, 'IT', 'S0001';
+ADDPRO 'Refrigerator', 30000.00, 'HA', 'S0002';
+
+-- ----(Method2-Automated PID & SID Together)----
+
+-- Function to generate Supplier ID based on Product Category (Alternative approach)
+create function fn2 (@CT as char(2))
+returns char(5)
+as 
+begin 
+    declare @SID as char(5);  -- Declare a variable for Supplier ID
+    if @CT = 'IT'  -- If Category is 'IT'
+        set @SID = 'S0001';  -- Set Supplier ID to 'S0001'
+    else if @CT = 'HA'  -- If Category is 'HA'
+        set @SID = 'S0002';  -- Set Supplier ID to 'S0002'
+    else if @CT = 'HC'  -- If Category is 'HC'
+        set @SID = 'S0003';  -- Set Supplier ID to 'S0003'
+    else
+        set @SID = 'NA';  -- If Category is not IT, HA, or HC, set SID to 'NA'
+    return @SID;  -- Return the Supplier ID
+end;    
+    
+-- Recreate ADDPRO procedure to use the ID generation function (fn2)
+create procedure ADDPRO    
+    @DS as VARCHAR(50),       -- Product Description
+    @PR as DECIMAL(10, 2),    -- Product Price
+    @CT as VARCHAR(10)        -- Product Category
+as 
+BEGIN
+    DECLARE @PID as  CHAR(5);  -- Declare variable for Product ID
+    DECLARE @I as int;           -- Declare variable for sequence value
+    DECLARE @SID as char(5);    -- Declare variable for Supplier ID
+    set @I = (next value for SQ2);  -- Get next sequence value
+    set @PID = dbo.fn1('P', @I);  -- Generate Product ID using fn1
+    set @SID = dbo.fn2(@CT);      -- Get Supplier ID based on Category using fn2
+    insert into PRODUCT  -- Insert into PRODUCT table
+    VALUES (@PID, @DS, @PR, @CT, @SID); -- Insert the data
+    SELECT * from PRODUCT where pid = @PID;  -- Select and display the newly added product
+end;        
+
+-- Execute the ADDPRO procedure
+ADDPRO 'Laptop', 50000.00, 'IT';
+ADDPRO 'Refrigerator', 30000.00, 'HA';
+ADDPRO 'Air Conditioner', 40000.00, 'HA';
+ADDPRO 'Blood Pressure Monitor', 2000.00, 'HC';
+ADDPRO 'Smartphone', 25000.00, 'IT';
+ADDPRO 'Oximeter', 1500.00, 'HC';
+
+
+-- Recreate CUST table (if needed)
+CREATE TABLE CUST (
+    CID CHAR(5) PRIMARY KEY,          -- Customer ID (Primary Key)
+    CNAME VARCHAR(50) NOT NULL,       -- Customer Name (Not Null)
+    ADDRESS VARCHAR(100) NOT NULL,    -- Customer Address (Not Null)
+    CITY VARCHAR(20) NOT NULL,        -- Customer City (Not Null)
+    PHONE VARCHAR(15) NOT NULL,       -- Customer Phone (Not Null)
+    EMAIL VARCHAR(50) NOT NULL,       -- Customer Email (Not Null)
+    DOB DATE CHECK (DOB < '2000-01-01') -- Date of Birth (Must be before 1-Jan-2000)
+);
+
+-- Create a sequence for generating Customer IDs
+create sequence SQ3
+as INT
+start with 1
+increment by 1;
+
+-- Recreate ADDCUST procedure to use the ID generation function and sequence
+create procedure ADDCUST  
+    @NM as VARCHAR(50),       -- Customer Name
+    @AD as varchar(50),       -- Customer Address
+    @CT as VARCHAR(10),       -- Customer City
+    @PH as varchar(15),       -- Customer Phone
+    @EM as varchar(30),       -- Customer Email
+    @DB as date               -- Customer Date of Birth
+as 
+BEGIN
+    DECLARE @CID as  CHAR(5);  -- Declare variable for Customer ID
+    DECLARE @I as int;           -- Declare variable for sequence value
+    set @I = (next value for SQ3);  -- Get next sequence value
+    set @CID = dbo.fn1('C', @I);  -- Generate Customer ID
+    insert into CUST  -- Insert into CUST table
+    VALUES (@CID, @NM, @AD, @CT, @PH, @EM, @DB); -- Insert the data
+    SELECT * from CUST where cid = @CID;  -- Select and display the newly added customer
+end;
+
+-- Execute the ADDCUST procedure
+ADDCUST 'Amit Sharma', '123 Main St', 'DELHI', '9876543215', 'amit@sharma.com', '1990-05-15'; 
+
+
+-- Recreate ORDERS Table (if needed)
+CREATE TABLE ORDERS (
+    OID CHAR(5) PRIMARY KEY,          -- Order ID (Primary Key)
+    ODATE DATE,                       -- Order Date
+    CID CHAR(5) FOREIGN KEY REFERENCES CUST(CID), -- Customer ID (Foreign Key)
+    PID CHAR(5) FOREIGN KEY REFERENCES PRODUCT(PID), -- Product ID (Foreign Key)
+    OQTY INT CHECK (OQTY >= 1)        -- Order Quantity (Must be >= 1)
+);
+
+-- Create a sequence for generating Order IDs
+create sequence SQ4
+as INT
+start with 1
+increment by 1;
+
+-- Recreate ADDORDER procedure to use the ID generation function and sequence
+create procedure ADDORDER           
+    @PID as char(5),         -- Product ID
+    @CID as CHAR(5),          -- Customer ID
+    @OQT as int                -- Order Quantity
+as 
+BEGIN
+    DECLARE @OID as  CHAR(5);  -- Declare Order ID variable
+    declare @I as int;           -- Declare sequence value variable
+    declare @OD as date;      -- Declare Order Date variable
+    set @OD = getdate();      -- Get current date for Order Date
+    set @I = (next value for SQ4);  -- Get next sequence value
+    set @OID = dbo.fn1('O', @I);  -- Generate Order ID
+    insert into ORDERS  -- Insert into ORDERS table
+    VALUES (@OID, @OD, @PID, @CID, @OQT); -- Insert the data
+    SELECT * from ORDERS where oid = @OID;  -- Select and display the newly added order
+end;
+
+-- Execute the ADDORDER procedure
+ADDORDER 'P0001', 'C0001', 2;
+
+
+-- Query6: (a) IMPLEMENT THE BELOW TRIGGERS ON THE INVENTORY STRUCTURE.
+--     WHENEVER THE ORDER IS PLACED, THE STOCK SHOULD BE UPDATED. ALSO, THE ACCEPTABILITY OF THE ORDER SHOULD BE DEPENDENT ON THE AVAILABILITY OF STOCK.
+--     IN CASE OF A CHANGE IN THE ORDERED QUANTITY, THE STOCK SHOULD ALSO BE UPDATED DEPENDENT ON THE AVAILABILITY OF STOCK.
+--        (b) CREATE THE PROCEDURES FOR BELOW REPORTS
+--     DAILY REPORT – SHOULD DISPLAY THE DETAILS OF THE TRANSACTIONS DONE DURING THE DAY.
+--     BILL – SHOULD GENERATE THE BILL FOR THE SPECIFIED ORDER NO.
+--     CUSTOMER LEDGER – SHOULD GIVE THE DETAILS OF ALL THE TRANSACTIONS DONE BY THE SPECIFIED CUSTOMER.
+--     SUPPLIER REPORT – SHOULD DISPLAY THE DETAILS OF THE PRODUCTS SUPPLIED BY THE SPECIFIED SUPPLIER.
+
+-- Trigger to update stock after an order is placed (INSERT)
+create trigger TR_IN_ORD
+on ORDERS
+for insert 
+as 
+begin
+    declare @OR as int;  -- Declare variable for Order Quantity
+    DECLARE @OS as int;  -- Declare variable for Stock Quantity
+    set @OR = (SELECT OQTY from inserted);  -- Get ordered quantity from the inserted order
+    set @OS = (SELECT SQTY from STOCK where PID = (SELECT PID from inserted));  -- Get stock quantity for the ordered product
+    if @OS >= @OR  -- If stock is sufficient
+        Begin 
+            update STOCK set SQTY = SQTY - @OR  -- Update stock quantity
+            WHERE PID = (SELECT PID from inserted);  -- For the ordered product
+            commit;  -- Commit the transaction
+            print('Order Accepted');  -- Print confirmation message
+        end;
+    else  -- If stock is insufficient
+        BEGIN 
+            rollback;  -- Rollback the transaction (order not accepted)
+            print('Insufficient stock - Order rejected');  -- Print rejection message
+        end;    
+end;            
+
+-- Trigger to update stock when an order is updated
+create trigger TR_UP_ORD
+on ORDERS
+for UPDATE
+as 
+BEGIN
+    declare @OQ as int;  -- Declare variable for Old Order Quantity
+    DECLARE @NQ as int;  -- Declare variable for New Order Quantity
+    set @OQ = (SELECT OQTY from deleted);  -- Get old order quantity (before update)
+    set @NQ = (SELECT OQTY from inserted);  -- Get new order quantity (after update)
+    
+    update STOCK set SQTY = SQTY + @OQ - @NQ  -- Update stock quantity based on the change in order quantity
+    where PID = (SELECT PID from inserted);  -- For the relevant product
+end;
+
+--  This trigger deletes corresponding entries from the Stock table when a product is deleted from the Product table.
+create TRIGGER TR_DL_PRO
+on PRODUCT
+for DELETE
+as 
+BEGIN
+    
+    DELETE from STOCK
+    where PID = (SELECT PID from deleted);
+end;    
+SELECT * from ORDERS;
+SELECT * from STOCK;
+INSERT INTO ORDERS (OID, ODATE, CID, PID, OQTY)
+VALUES
+('O0001', '2023-10-01', 'C0001', 'P0001', 2); 
+INSERT INTO ORDERS (OID, ODATE, CID, PID, OQTY)
+VALUES
+('O0002', '2023-10-02', 'C0002', 'P0002', 1);
+INSERT INTO ORDERS (OID, ODATE, CID, PID, OQTY)
+VALUES
+('O0009', '2024-02-02', 'C0002', 'P0002', 20);
+create TRIGGER TR_UP_ORD1
+on ORDERS
+for UPDATE
+as 
+BEGIN
+    declare @OQ as int;
+    DECLARE @NQ as int;
+    set @OQ = (SELECT OQTY from deleted);--old quantity
+    set @NQ = (SELECT OQTY from inserted);--new quantity
+    if @NQ <= (SELECT SQTY from STOCK where PID = (SELECT PID from inserted)) + @OQ
+        begin 
+            update STOCK set SQTY = SQTY + @OQ - @NQ
+            where PID = (SELECT PID from inserted);
+        commit;
+        end;
+    else
+        begin 
+            rollback;
+            print('Order can not be placed');
+        end;
+end;
+
+
+-- (b) Stored Procedures for Reports
+
+-- Procedure to generate a daily report
+create procedure pc_Daily_report 
+as 
+BEGIN
+    select ORDERS.OID,PRODUCT.PID,CUST.CID,PRODUCT.PRICE, ORDERS.OQTY*PRODUCT.PRICE as 'Amount'
+    from ORDERS
+    inner JOIN CUST
+    on CUST.CID = ORDERS.CID
+    inner join PRODUCT
+    on ORDERS.PID=PRODUCT.PID
+    where ORDERS.ODATE = getdate();
+end;    
+--call the procedure
+pc_Daily_report;
+--drop the procedure
+drop procedure pc_Daily_report;
+--delete from orders
+DELETE from ORDERS
+where ODATE = getdate();
+
+-- Procedure to generate a bill for a specific order
+create procedure pc_BILL @OID as char(5)
+as 
+BEGIN
+    SELECT
+        CUST.CNAME AS Customer_Name, 
+        CUST.CID AS Customer_ID, 
+        CUST.CITY AS Customer_City, 
+        CUST.PHONE AS Contact_Number, 
+        ORDERS.OID AS Order_ID, 
+        ORDERS.ODATE AS Order_Date, 
+        ORDERS.OQTY AS Order_Quantity, 
+        PRODUCT.PID AS Product_ID, 
+        PRODUCT.PDESC AS Product_Description, 
+        PRODUCT.PRICE AS Unit_Price, 
+        (ORDERS.OQTY * PRODUCT.PRICE) AS Total_Amount
+    from ORDERS
+    inner join PRODUCT
+    on ORDERS.PID = PRODUCT.PID
+    inner join CUST
+    on CUST.CID = ORDERS.CID
+    where ORDERS.OID = @OID;
+end;
+
+--call the procedure
+pc_BILL 'O0004';
+pc_BILL 'O0003';
+pc_BILL 'O0002';
+
+-- Procedure to generate a customer ledger
+create procedure pc_Customer_ledger @CID as char(5)
+as 
+BEGIN
+    select CUST.CID,ORDERS.OID,PRODUCT.PID,ORDERS.OQTY,PRODUCT.PRICE, ORDERS.OQTY*PRODUCT.PRICE as 'Amount'
+    from ORDERS
+    inner JOIN CUST
+    on CUST.CID = ORDERS.CID
+    inner join PRODUCT
+    on ORDERS.PID=PRODUCT.PID
+    where CUST.CID = @CID;
+end;   
+--call procedure
+pc_Customer_ledger 'C0001';
+pc_Customer_ledger 'C0002';
+
+-- Procedure to generate a supplier report
+create procedure pc_supplier_report @SID as char(5)
+as 
+BEGIN
+    SELECT 
+        SUPPLIER.SID,
+        PRODUCT.PID,
+        PRODUCT.PDESC,
+        PRODUCT.CATEGORY,
+        PRODUCT.PRICE
+        from SUPPLIER
+        inner join PRODUCT
+        on SUPPLIER.SID = PRODUCT.SID
+        where SUPPLIER.SID = @SID;
+end;  
+--call the procedure
+pc_supplier_report 'S0001';
+
+-- Query7: CREATE A PURCHASE TABLE CONTAINING PID, SID, PQTY, DOP. THIS TABLE WILL BE USED TO AUTOMATICALLY GENERATE THE PURCHASE ORDER
+-- WHENEVER THE ORDER IS PLACED AND THE UPDATED STOCK QUANTITY GOES BELOW THE ROL, AN ENTRY SHOULD BE MADE IN THE PURCHASE TABLE.
+-- PID – WILL BE THE ID OF THE PRODUCT WHICH IS BEING ORDERED.
+-- SID – SID OF THE PRODUCT WHICH IS BEING ORDERED NEEDS TO BE PICKED FROM THE SUPPLIER TABLE.
+-- PQTY – PURCHASE QUANTITY WILL BE THE MOQ FOR THE RESPECTIVE PRODUCT.
+-- DOP - SHOULD BE THE CURRENT DATE.
+
+-- Create the PURCHASE table
+Create TABLE PURCHASE (
+  PID char(5),  -- Product ID (Foreign Key referencing PRODUCT)
+  SID char(5) FOREIGN key references SUPPLIER(SID),  -- Supplier ID (Foreign Key referencing SUPPLIER)
+  PQTY int,  -- Purchase Quantity
+  DOP date  -- Date of Purchase
+);
+--update the STOCK table
+ update STOCK set ROL = '10'; 
+ update STOCK set MOQ = '50'; 
+ 
+ --Recreate the TR_IN_ORD trigger
+ create trigger TR_IN_ORD
+on ORDERS
+for insert 
+as 
+begin
+    declare @QR as int; --Quantity Required
+    DECLARE @QS as int; --Quantity in stock
+    set @QR = (SELECT oqty from inserted);
+    set @QS = (SELECT sqty from STOCK where pid = (SELECT pid from inserted));
+    if @QS>=@QR
+        Begin 
+            update STOCK set sqty = sqty - @QR
+            WHERE pid = (SELECT pid from inserted);
+            commit;
+            print('Order Accepted');
+        end;
+    else
+        BEGIN 
+            rollback;
+            print('Insufficient stock-Order rejected');
+        end;    
+end; 
+SELECT * from STOCK;
+
+-- Create a trigger to insert into PURCHASE when stock goes below ROL
+CREATE TRIGGER TR_UP_STK
+on STOCK
+for UPDATE
+as 
+BEGIN 
+    DECLARE @PID as char(5);
+    DECLARE @SID as char(5);
+    DECLARE @PQTY as int;
+    DECLARE @DOP as date;
+    DECLARE @SQTY as int;
+    DECLARE @rol as int;
+    set @SQTY = (SELECT SQTY FROM inserted);  -- Get the updated stock quantity
+    set @rol = (SELECT ROL FROM inserted);    -- Get the reorder level
+    set @PID = (SELECT PID from inserted);    -- Get the Product ID
+    --Get the Supplier ID for the product from the supplier table.
+    set @SID = (SELECT SID FROM SUPPLIER WHERE SID = (SELECT SID FROM PRODUCT WHERE PID = @PID));
+    set @PQTY = (SELECT MOQ FROM STOCK WHERE PID = @PID);  -- Get the Minimum Order Quantity
+    set @DOP = getdate();  -- Get the current date
+    if @SQTY <= @rol  -- If stock quantity is below reorder level
+        INSERT into PURCHASE(PID, SID, PQTY, DOP)  -- Insert a purchase order into the PURCHASE table
+        VALUES(@PID, @SID, @PQTY, @DOP);
+    else
+        commit;
+end;    
+
+SELECT * from ORDERS;
+SELECT * from STOCK;
+insert into ORDERS(OID,odate,cid,pid,oqty)
+values('O0006',getdate(),'C0002','P0003',12); 
+insert into ORDERS(OID,odate,cid,pid,oqty)
+values('O0007',getdate(),'C0003','P0003',12); 
+SELECT * from PURCHASE;
